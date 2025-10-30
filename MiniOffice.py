@@ -1,8 +1,8 @@
 import os
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar, QTextEdit, QWhatsThis, QStatusBar, QFileDialog, QInputDialog, QDockWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QFontDialog, QColorDialog, QMessageBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar, QTextEdit, QWhatsThis, QStatusBar, QFileDialog, QInputDialog, QDockWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QFontDialog, QColorDialog, QMessageBox, QSizePolicy
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QTextCursor, QTextCharFormat, QColor, QTextDocument, QFont
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 
 #  cambiar tipo de letra, tamaño... y redimensionar el docFormat
 class VentanaPrincipal(QMainWindow):
@@ -128,9 +128,19 @@ class VentanaPrincipal(QMainWindow):
         editar.addAction(actionCopiar)
         editar.addAction(actionPegar)
 
+        # Barra de herramientas Doc
         toolbar = QToolBar("Barra de herramientas 1")
         toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         
+        # Barra de herramientas texto
+        # === Barra de formato (debajo de la principal) ===
+        toolbarFormato = QToolBar("Formato de Texto", self)
+        toolbarFormato.setMovable(False)
+        toolbarFormato.setFloatable(False)
+        toolbarFormato.setIconSize(QSize(20, 20))
+        toolbarFormato.setFixedHeight(40)
+        toolbarFormato.setToolButtonStyle(Qt.ToolButtonIconOnly)
+
         ## agregar acciones a la barra de herramientas
         toolbar.addAction(actionNuevoArchivo)
         toolbar.addAction(actionAbrirArchivo)
@@ -165,15 +175,7 @@ class VentanaPrincipal(QMainWindow):
         self.dockBuscar.setVisible(False)  # oculto al inicio
         self.addDockWidget(Qt.RightDockWidgetArea, self.dockBuscar)
         self.dockBuscar.visibilityChanged.connect(self.cerrarDockBuscar)
-
-        # Dock para el formato del texto
-        self.dockFormato = QDockWidget("Formato de Texto", self)
-        self.dockFormato.setTitleBarWidget(QWidget())  # Quita la barra de titulo del dock
-        self.dockFormato.setFixedHeight(40)
-        self.dockFormato.setAllowedAreas(Qt.TopDockWidgetArea)
-        self.dockFormato.setVisible(True)
-        self.addDockWidget(Qt.TopDockWidgetArea, self.dockFormato)
-
+        
         # Contenedor de busqueda
         contenedorBusqueda = QWidget()
         contenedorBusqueda.setFixedSize(300, 150)
@@ -226,12 +228,6 @@ class VentanaPrincipal(QMainWindow):
         self.btnReemplazar.clicked.connect(self.reemplazarTexto)
         self.btnReemplazarTodo.clicked.connect(self.reemplazarTodoTexto)
 
-        # Contenedor de formato
-        contenedorFormato = QWidget()
-        layoutFormato = QHBoxLayout(contenedorFormato)
-        layoutFormato.setContentsMargins(5, 5, 0, 0)
-        layoutFormato.setSpacing(10)
-
         # Botones Formato
         self.btnFuente = self.crearBoton(
             QIcon.fromTheme("insert-text"),
@@ -268,15 +264,16 @@ class VentanaPrincipal(QMainWindow):
             self.aplicarBackground
         )
 
-        layoutFormato.addWidget(self.btnFuente)
-        layoutFormato.addWidget(self.btnNegrita)
-        layoutFormato.addWidget(self.btnCursiva)
-        layoutFormato.addWidget(self.btnSubrayado)
-        layoutFormato.addWidget(self.btnBackGround)
+        # Agregar botones al toolbar de formato
+        toolbarFormato.addWidget(self.btnFuente)
+        toolbarFormato.addWidget(self.btnNegrita)
+        toolbarFormato.addWidget(self.btnCursiva)
+        toolbarFormato.addWidget(self.btnSubrayado)
+        toolbarFormato.addWidget(self.btnBackGround)
 
-        layoutFormato.setAlignment(Qt.AlignLeft)
-
-        self.dockFormato.setWidget(contenedorFormato)
+        # Añadir el toolbar debajo del principal
+        self.addToolBarBreak(Qt.TopToolBarArea)  # Esto crea una "nueva fila"
+        self.addToolBar(Qt.TopToolBarArea, toolbarFormato)
 
         # Crear el contador y establecer la barra de estado
         palabras = 0
