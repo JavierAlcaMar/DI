@@ -233,14 +233,12 @@ class VentanaPrincipal(QMainWindow):
         layoutFormato.setSpacing(10)
 
         # Botones Formato
-        """
         self.btnFuente = self.crearBoton(
-            QIcon.fromTheme("preferences-desktop-font"),        #-----------------------
+            QIcon.fromTheme("insert-text"),
             "Ctrl+T",
             "Cambiar tipografía y tamaño del texto",
             self.aplicarFuente
         )
-        """
 
         self.btnNegrita = self.crearBoton(
             QIcon.fromTheme("format-text-bold"),
@@ -270,10 +268,7 @@ class VentanaPrincipal(QMainWindow):
             self.aplicarBackground
         )
 
-        """
         layoutFormato.addWidget(self.btnFuente)
-        """
-
         layoutFormato.addWidget(self.btnNegrita)
         layoutFormato.addWidget(self.btnCursiva)
         layoutFormato.addWidget(self.btnSubrayado)
@@ -583,6 +578,7 @@ class VentanaPrincipal(QMainWindow):
         else:
             self.close()
     
+    """
     # Evento para el cierre de la app
     def closeEvent(self, event):
         respuesta = self.popUpExit()
@@ -591,6 +587,7 @@ class VentanaPrincipal(QMainWindow):
             event.accept()         # se cierra
         else:
             event.ignore()         # no se cierra
+    """
 
     # Funcion para contar palabras
     def contarPalabras(self):
@@ -602,10 +599,25 @@ class VentanaPrincipal(QMainWindow):
         self.palabras = self.contarPalabras()
         self.statusBar().showMessage(f"Palabras: {self.palabras}")
 
-    """
     def aplicarFuente(self):
-        pass
-    """
+        # Abrir el diálogo de selección de fuente
+        ok, fuente = QFontDialog.getFont(self)
+
+        if not ok:  # Si el usuario cancela
+            return
+
+        cursor = self.doc.textCursor()
+
+        # Crear el formato con la fuente seleccionada
+        formato = QTextCharFormat()
+        formato.setFont(fuente)
+
+        if cursor.hasSelection():
+            # Aplicar solo a la selección
+            cursor.mergeCharFormat(formato)
+        else:
+            # Aplicar al formato actual (para texto nuevo)
+            self.doc.mergeCurrentCharFormat(formato)
 
     def aplicarNegrita(self):
         cursor = self.doc.textCursor()
