@@ -1,9 +1,10 @@
 import os
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar, QTextEdit, QWhatsThis, QStatusBar, QFileDialog, QInputDialog, QDockWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QFontDialog, QColorDialog
+from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar, QTextEdit, QWhatsThis, QStatusBar, QFileDialog, QInputDialog, QDockWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QFontDialog, QColorDialog, QMessageBox
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QTextCursor, QTextCharFormat, QColor, QTextDocument, QFont
 from PySide6.QtCore import Qt
 
+#  cambiar tipo de letra, tamaño... y redimensionar el docFormat
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -110,7 +111,7 @@ class VentanaPrincipal(QMainWindow):
             QIcon.fromTheme("application-exit"),
             "Ctrl+Q",
             "Salir de la aplicación",
-            self.close
+            self.salir
         )
 
         # Agregamos la accion a los menus correspondientes
@@ -173,8 +174,9 @@ class VentanaPrincipal(QMainWindow):
         self.dockFormato.setVisible(True)
         self.addDockWidget(Qt.TopDockWidgetArea, self.dockFormato)
 
-        contenedor = QWidget()
-        contenedor.setFixedSize(300, 150)
+        # Contenedor de busqueda
+        contenedorBusqueda = QWidget()
+        contenedorBusqueda.setFixedSize(300, 150)
         layout = QVBoxLayout()
 
         # Campo de búsqueda
@@ -216,18 +218,21 @@ class VentanaPrincipal(QMainWindow):
         layout.addLayout(layoutBotones1)
         layout.addLayout(layoutBotones2)
 
-        contenedor.setLayout(layout)
-        self.dockBuscar.setWidget(contenedor)
+        contenedorBusqueda.setLayout(layout)
+        self.dockBuscar.setWidget(contenedorBusqueda)
 
         self.txtBuscar.textChanged.connect(self.buscarPalabra)
         self.btnBuscarSiguiente.clicked.connect(self.buscarSiguientePalabra)
         self.btnReemplazar.clicked.connect(self.reemplazarTexto)
         self.btnReemplazarTodo.clicked.connect(self.reemplazarTodoTexto)
 
-        # Botones Formato
+        # Contenedor de formato
         contenedorFormato = QWidget()
         layoutFormato = QHBoxLayout(contenedorFormato)
+        layoutFormato.setContentsMargins(5, 5, 0, 0)
+        layoutFormato.setSpacing(10)
 
+        # Botones Formato
         """
         self.btnFuente = self.crearBoton(
             QIcon.fromTheme("preferences-desktop-font"),        #-----------------------
@@ -275,6 +280,7 @@ class VentanaPrincipal(QMainWindow):
         layoutFormato.addWidget(self.btnBackGround)
 
         layoutFormato.setAlignment(Qt.AlignLeft)
+
         self.dockFormato.setWidget(contenedorFormato)
 
         # Crear el contador y establecer la barra de estado
@@ -326,33 +332,73 @@ class VentanaPrincipal(QMainWindow):
         boton.clicked.connect(metodo)
         return boton
     
+    # PopUps
+    def popUpNew(self):
+        # Si hay texto en el documento actual
+        if self.doc.toPlainText().strip():
+            # Mostrar diálogo de confirmación
+            respuesta = QMessageBox.question(
+                self,
+                "Guardar cambios",
+                "¿Deseas guardar los cambios antes de crear un nuevo archivo?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
+
+            if respuesta == QMessageBox.Yes:
+                # Guardar el archivo
+                self.GuardarArchivo()
+                # Luego limpiar el documento
+                self.doc.clear()
+                self.nombreArchivoActual = "Sin título"
+                self.statusBar().showMessage("Nuevo archivo creado.")
+                return "cre"
+            elif respuesta == QMessageBox.No:
+                 # Cancelar la acción
+                self.statusBar().showMessage("Acción cancelada.")
+                return "can"
+            
+            return "exit"
+        
+    def popUpExit(self):
+        # Si hay texto en el documento actual
+        if self.doc.toPlainText().strip():
+            # Mostrar diálogo de confirmación
+            respuesta = QMessageBox.question(
+                self,
+                "Guardar cambios",
+                "¿Deseas guardar los cambios antes de salir?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
+
+            if respuesta == QMessageBox.Yes:
+                # Salir y guardar
+                self.GuardarArchivo()
+                return "exit1"
+            elif respuesta == QMessageBox.No:
+                 # Cancelar la acción
+                return "exit2"
+
+            return "can"
+
     # Creacion de metodos para las acciones
     def nuevoArchivo(self):
-        self.nombreArchivoActual = "Sin título"
-         # Si el dock del editor fue cerrado, lo volvemos a mostrar
-        if not self.dockWidget.isVisible():
-            self.addDockWidget(Qt.LeftDockWidgetArea, self.dockWidget)
-            self.dockWidget.show()
+        respuesta = self.popUpNew()
 
-        # Si no hay editor o está oculto, creamos uno nuevo
-        if not self.doc or self.doc.isHidden():
-            nuevo_editor = QTextEdit()
-            nuevo_editor.textChanged.connect(self.actualizarContadorPalabras)
-            self.doc = nuevo_editor
-            self.dockWidget.setWidget(self.doc)
-            self.setCentralWidget(self.doc)
-        else:
-            # Si ya existe, simplemente limpiar el contenido
+        if(respuesta == "cre" or respuesta == "can"):
+            return
+        elif(respuesta == "exit"):
+            # Si no hay texto (archivo vacío)
             self.doc.clear()
+            self.nombreArchivoActual = "Sin título"
         
-
     def AbrirArchivo(self):
         ruta = QFileDialog.getOpenFileName(self, "Abrir Archivo", "", "Archivos de texto (*.txt);;Todos los archivos (*)")  # Literalmente lo pone en la documentacion :/
+        
         if ruta[0]: # El 0 contiene la ruta completa del archivo que ha elegido el usuario, el 1 es el filtro seleccionado, si no se selecciona nada, ruta[0] es una cadena vacia
             self.nombreArchivoActual = ruta[0]
-            with open(ruta[0], 'r') as archivo:
+            with open(ruta[0], 'r', encoding="utf-8") as archivo:
                 contenido = archivo.read()
-                self.doc.setPlainText(contenido)
+                self.doc.setText(contenido)
 
     def GuardarArchivo(self):
         ruta = QFileDialog.getSaveFileName(self, "Guardar Archivo", self.nombreArchivoActual, "Archivos de texto (*.txt);;Todos los archivos (*)")
@@ -527,6 +573,25 @@ class VentanaPrincipal(QMainWindow):
         if not visible:
             self.limpiarResaltados()
 
+    def salir(self):
+        respuesta = self.popUpExit()
+
+        if respuesta == "exit":
+            self.close()
+        elif respuesta == "cancel":
+            self.statusBar().showMessage("Salida cancelada.")
+        else:
+            self.close()
+    
+    # Evento para el cierre de la app
+    def closeEvent(self, event):
+        respuesta = self.popUpExit()
+
+        if respuesta == "exit1" or respuesta == "exit2":
+            event.accept()         # se cierra
+        else:
+            event.ignore()         # no se cierra
+
     # Funcion para contar palabras
     def contarPalabras(self):
         texto = self.doc.toPlainText()
@@ -601,3 +666,18 @@ if __name__ == "__main__":
     ventana1 = VentanaPrincipal()
     ventana1.show()
     app.exec()
+
+
+""" Siempre que quieras ejecutar la función ahora mismo: ()
+
+    En las variables 2 formas:
+        def saludar():
+            return "Hola!"
+
+        x = saludar        # x apunta a la función
+        y = saludar()      # y guarda el resultado ("Hola!")
+
+        print(x)  # ➜ <function saludar at 0x...>
+        print(x())  # ➜ Hola!
+        print(y)  # ➜ Hola!
+"""
