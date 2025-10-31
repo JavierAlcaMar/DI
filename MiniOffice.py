@@ -4,7 +4,6 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar, QTextEdit, QW
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QTextCursor, QTextCharFormat, QColor, QTextDocument, QFont
 from PySide6.QtCore import Qt, QSize
 
-#  cambiar tipo de letra, tamaño... y redimensionar el docFormat
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
         super().__init__()
