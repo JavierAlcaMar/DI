@@ -196,11 +196,6 @@ class VentanaPrincipal(QMainWindow):
         layoutReemplazar.addWidget(self.txtReemplazar)
         layout.addLayout(layoutReemplazar)
 
-        # Campo de formato
-        layoutFormato = QHBoxLayout()
-        layoutFormato.addWidget(QLabel("Formato:"))
-        layout.addLayout(layoutFormato)
-
         # Botones Buscar
         layoutBotones1 = QHBoxLayout()
         layoutBotones2 = QHBoxLayout()
@@ -598,7 +593,7 @@ class VentanaPrincipal(QMainWindow):
             posicion_actual = indice + len(texto_buscar)
 
         # Actualizar el contenido del documento y limpiar resaltados
-        self.doc.setPlainText(nuevo_contenido)
+        self.doc.setText(nuevo_contenido)
         self.limpiarResaltados()
 
     def cerrarDockBuscar(self, visible: bool):
