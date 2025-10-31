@@ -208,6 +208,10 @@ class VentanaPrincipal(QMainWindow):
         self.btnBuscarSiguiente = QPushButton("Buscar siguiente")
         self.btnBuscarSiguiente.setFixedSize(120, 30)
         layoutBotones1.addWidget(self.btnBuscarSiguiente)
+
+        self.btnBuscarAnterior = QPushButton("Buscar anterior")
+        self.btnBuscarAnterior.setFixedSize(120, 30)
+        layoutBotones1.addWidget(self.btnBuscarAnterior)
         
         self.btnReemplazar = QPushButton("Reemplazar")
         self.btnReemplazarTodo = QPushButton("Reemplazar todo")
@@ -224,6 +228,7 @@ class VentanaPrincipal(QMainWindow):
 
         self.txtBuscar.textChanged.connect(self.buscarPalabra)
         self.btnBuscarSiguiente.clicked.connect(self.buscarSiguientePalabra)
+        self.btnBuscarAnterior.clicked.connect(self.buscarAnteriorPalabra)
         self.btnReemplazar.clicked.connect(self.reemplazarTexto)
         self.btnReemplazarTodo.clicked.connect(self.reemplazarTodoTexto)
 
@@ -505,6 +510,42 @@ class VentanaPrincipal(QMainWindow):
             cursor_inicio = QTextCursor(self.doc.document())
             cursor_inicio.movePosition(QTextCursor.Start)
             self.buscarPalabra(cursor_inicio)
+
+    def buscarAnteriorPalabra(self):
+        texto_buscar = self.txtBuscar.text().strip()
+        if not texto_buscar:
+            self.statusBar().showMessage("Ingrese texto para buscar.")
+            return
+
+        cursor_actual = self.doc.textCursor()
+
+        # Determinar desde dónde empezar la búsqueda
+        if cursor_actual.hasSelection():
+            # Si hay selección, empezamos justo antes de la coincidencia actual
+            nueva_pos = cursor_actual.selectionStart()
+            cursor_inicio = QTextCursor(self.doc.document())
+            cursor_inicio.setPosition(nueva_pos)
+        else:
+            cursor_inicio = cursor_actual
+
+        # Buscar hacia atrás
+        nuevo_cursor = self.doc.document().find(texto_buscar, cursor_inicio, QTextDocument.FindBackward)
+
+        if not nuevo_cursor.isNull():
+            self.doc.setTextCursor(nuevo_cursor)
+            self.marcarBackGround(nuevo_cursor, "magenta")
+            self.last_match_range = (nuevo_cursor.selectionStart(), nuevo_cursor.selectionEnd())
+        else:
+            # Si no se encuentra nada, hacer wrap al final del documento
+            cursor_final = QTextCursor(self.doc.document())
+            cursor_final.movePosition(QTextCursor.End)
+            nuevo_cursor = self.doc.document().find(texto_buscar, cursor_final, QTextDocument.FindBackward)
+            if not nuevo_cursor.isNull():
+                self.doc.setTextCursor(nuevo_cursor)
+                self.marcarBackGround(nuevo_cursor, "magenta")
+                self.last_match_range = (nuevo_cursor.selectionStart(), nuevo_cursor.selectionEnd())
+            else:
+                self.statusBar().showMessage("No se encontró el texto.")
         
     def reemplazarTexto(self):
         texto_reemplazar = self.txtReemplazar.text()
