@@ -332,7 +332,7 @@ class VentanaPrincipal(QMainWindow):
                 self,
                 "Guardar cambios",
                 "¿Deseas guardar los cambios antes de crear un nuevo archivo?",
-                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+                QMessageBox.Yes | QMessageBox.No
             )
 
             if respuesta == QMessageBox.Yes:
@@ -342,13 +342,12 @@ class VentanaPrincipal(QMainWindow):
                 self.doc.clear()
                 self.nombreArchivoActual = "Sin título"
                 self.statusBar().showMessage("Nuevo archivo creado.")
-                return "cre"
-            elif respuesta == QMessageBox.No:
-                 # Cancelar la acción
-                self.statusBar().showMessage("Acción cancelada.")
-                return "can"
+                return
             
-            return "exit"
+             # Cancelar la acción
+            self.statusBar().showMessage("Acción cancelada.")
+            self.doc.clear()
+            return
         
     def popUpExit(self):
         # Si hay texto en el documento actual
@@ -374,13 +373,6 @@ class VentanaPrincipal(QMainWindow):
     # Creacion de metodos para las acciones
     def nuevoArchivo(self):
         respuesta = self.popUpNew()
-
-        if(respuesta == "cre" or respuesta == "can"):
-            return
-        elif(respuesta == "exit"):
-            # Si no hay texto (archivo vacío)
-            self.doc.clear()
-            self.nombreArchivoActual = "Sin título"
         
     def AbrirArchivo(self):
         ruta = QFileDialog.getOpenFileName(self, "Abrir Archivo", "", "Archivos de texto (*.txt);;Todos los archivos (*)")  # Literalmente lo pone en la documentacion :/
@@ -455,26 +447,42 @@ class VentanaPrincipal(QMainWindow):
 
     # Busca la primera aparicion de la palabra en el documento
     def buscarPalabra(self, cursor=None):
+        # Limpiamos y resaltamos todas las coincidencias primero
         self.limpiarResaltados()
         texto_buscar = self.txtBuscar.text().strip()
         self.resaltarTodasCoincidencias(texto_buscar)
-        
+
         if not texto_buscar:
             return
 
-        if cursor is None:
-            # Mover el cursor al inicio del documento
-            cursor = self.doc.textCursor()
-            cursor.movePosition(QTextCursor.Start)
-            self.doc.setTextCursor(cursor)
-        # Buscar la primera aparición
-        nuevo_cursor = self.doc.document().find(texto_buscar, cursor)
+        # Si nos llaman pasando un QTextCursor (desde Buscar siguiente/anterior),
+        # lo usaremos como punto de partida. Si no (por ejemplo textChanged),
+        # creamos uno temporal desde el inicio del documento.
+        if isinstance(cursor, QTextCursor):
+            start_cursor = cursor
+            called_from_buttons = True
+        else:
+            start_cursor = self.doc.textCursor()
+            start_cursor.movePosition(QTextCursor.Start)
+            called_from_buttons = False
+
+        # Buscar a partir del cursor de inicio
+        nuevo_cursor = self.doc.document().find(texto_buscar, start_cursor)
 
         if not nuevo_cursor.isNull():
-            # Seleccionar y resaltar la coincidencia
+            # Mover el cursor visible al resultado
             self.doc.setTextCursor(nuevo_cursor)
+            self.doc.ensureCursorVisible()      # Scrolea solo hasta la primera aparición
             self.marcarBackGround(nuevo_cursor, "magenta")
-            self.last_match_range = (nuevo_cursor.selectionStart(), nuevo_cursor.selectionEnd())        # Guardar el cursor de la primera coincidencia
+            self.last_match_range = (nuevo_cursor.selectionStart(), nuevo_cursor.selectionEnd())
+
+            # Si la búsqueda vino desde los botones, damos foco al QTextEdit
+            # Si vino por textChanged, dejamos el foco en el QLineEdit (para poder seguir escribiendo)
+            if called_from_buttons:
+                self.doc.setFocus()
+            else:
+                # mantenemos el foco en el QLineEdit
+                self.txtBuscar.setFocus()
         else:
             self.statusBar().showMessage("No se encontró el texto.")
 
