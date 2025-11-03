@@ -3,6 +3,8 @@
 **Mini Word** es un editor de texto ligero desarrollado con **PySide6 (Qt for Python)**.  
 Incluye funcionalidades básicas de edición, búsqueda, reemplazo y formato de texto, con una interfaz gráfica moderna y fácil de usar.
 
+![image alt](https://github.com/JavierAlcaMar/DI/blob/53e54f77e2bd13619bd92f455f0ede5d1d6c7ec2/cap.png)
+
 ---
 
 ## 🚀 Características principales
