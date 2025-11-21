@@ -1,0 +1,3 @@
+([('MiniOffice',
+   '/Users/javivi/Desktop/MiniOffice/dist/MiniOffice',
+   'EXECUTABLE')],)
