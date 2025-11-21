@@ -161,6 +161,7 @@ mini-word/
 │   └── logo.png             # Imagen de ejemplo para la interfaz
 ├── Pipfile                  # Gestión de dependencias
 └── README.md                # Documentación del proyecto
+```
 
 ---
 
