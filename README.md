@@ -1,5 +1,7 @@
 # 📝 Mini Word
 
+![Logo de Mini Word](cap.png)
+
 **Mini Word** es un editor de texto ligero desarrollado con **PySide6 (Qt for Python)**.
 Incluye funcionalidades básicas de edición, búsqueda, reemplazo y formato de texto, con una interfaz gráfica moderna y fácil de usar.
 
@@ -162,6 +164,9 @@ mini-word/
 ├── Pipfile                  # Gestión de dependencias
 └── README.md                # Documentación del proyecto
 ```
+![Logo de Mini Word](cap2.png)
+
+![Logo de Mini Word](cap3.png)
 
 ---
 
