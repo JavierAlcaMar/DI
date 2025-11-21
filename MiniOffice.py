@@ -10,7 +10,7 @@ class VentanaPrincipal(QMainWindow):
         self.setWindowTitle("Mini Word")
         # Establecer el icono de la aplicación
         self.setWindowIcon(QIcon(os.path.join(os.path.dirname(
-            __file__), "imagesMO/iconoApp.png")))
+            __file__), "imagesMO/iconoApp.ico")))
 
         # Creamos la barra de menus
         barraMenus = self.menuBar()
