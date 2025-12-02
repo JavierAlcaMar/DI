@@ -1,6 +1,6 @@
 # 📝 Mini Word
 
-![Logo de Mini Word](cap.png)
+![Mini Word](imagesMO/cap.png)
 
 **Mini Word** es un editor de texto ligero desarrollado con **PySide6 (Qt for Python)**.
 Incluye funcionalidades básicas de edición, búsqueda, reemplazo y formato de texto, con una interfaz gráfica moderna y fácil de usar.
@@ -164,9 +164,101 @@ mini-word/
 ├── Pipfile                  # Gestión de dependencias
 └── README.md                # Documentación del proyecto
 ```
-![Logo de Mini Word](cap2.png)
+![Mini Word](imagesMO/cap2.png)
 
-![Logo de Mini Word](cap3.png)
+![Mini Word](imagesMO/cap3.png)
+
+---
+
+## 📃 Creación del Certificado Digital
+
+![Mini Word](imagesMO/cap4.png)
+
+Se generó un certificado tipo *Code Signing* mediante PowerShell:
+
+```powershell
+$cert = New-SelfSignedCertificate -Type CodeSigningCert `
+-Subject "CN=MiniOffice Test Code Signing" `
+-CertStoreLocation "Cert:\CurrentUser\My"
+```
+
+---
+
+## 📜 Firma Digital del Ejecutable MiniWord.exe
+
+```powershell
+Get-ChildItem "C:\Program Files (x86)" -Recurse -Filter signtool.exe
+```
+
+![Mini Word](imagesMO/cap5.png)
+
+```powershell
+signtool sign /f MiniOfficeTestCert.pfx /fd SHA256 /tr http://timestamp.digicert.com
+```
+
+![Mini Word](imagesMO/cap6.png)
+
+---
+
+## 🔩 Creación del Instalador con Inno Setup
+
+![Mini Word](imagesMO/cap7.png)
+
+![Mini Word](imagesMO/cap8.png)
+
+![Mini Word](imagesMO/cap9.png)
+
+![Mini Word](imagesMO/cap10.png)
+
+![Mini Word](imagesMO/cap11.png)
+
+![Mini Word](imagesMO/cap12.png)
+
+![Mini Word](imagesMO/cap13.png)
+
+![Mini Word](imagesMO/cap14.png)
+
+![Mini Word](imagesMO/cap15.png)
+
+![Mini Word](imagesMO/cap16.png)
+
+![Mini Word](imagesMO/cap17.png)
+
+![Mini Word](imagesMO/cap18.png)
+
+---
+
+## 💻 Creación del Instalador con Inno Setup
+
+![Mini Word](imagesMO/cap19.png)
+
+![Mini Word](imagesMO/cap20.png)
+
+---
+
+## 👁️‍🗨️ Pruebas de Instalación
+
+![Mini Word](imagesMO/cap21.png)
+
+![Mini Word](imagesMO/cap22.png)
+
+![Mini Word](imagesMO/cap23.png)
+
+![Mini Word](imagesMO/cap24.png)
+
+![Mini Word](imagesMO/cap25.png)
+
+![Mini Word](imagesMO/cap26.png)
+
+---
+
+## ✅ 6. Comprobación tras la instalación
+
+![Mini Word](imagesMO/cap27.png)
+
+![Mini Word](imagesMO/cap28.png)
+
+![Mini Word](imagesMO/cap29.png)
 
 ---
 
@@ -179,6 +271,10 @@ mini-word/
 * **popUpNew() y popUpExit()** → Muestran ventanas emergentes para guardar antes de crear o cerrar archivos.
 
 ---
+
+## 📄 Licencia
+
+**GNU Affero General Public License v3 (AGPL-3.0)**
 
 ## 🧑‍💻 Autor
 
