@@ -5,6 +5,7 @@
 # Ignorar una carpeta específica y su contenido
 dist/
 build/
+Output/
 
 # Ignorar un archivo de configuración en la raíz del proyecto
 /development.log
