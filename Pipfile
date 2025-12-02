@@ -6,9 +6,11 @@ name = "pypi"
 [packages]
 pyside6 = "==6.9.2"
 pyinstaller = "*"
+pyaudio = "*"
+speechrecognition = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.13"
-python_full_version = "3.13.7"
+python_version = "3.11"
+python_full_version = "3.11.5"

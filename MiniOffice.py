@@ -2,9 +2,14 @@ import os
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar, QTextEdit, QWhatsThis, QStatusBar, QFileDialog, QInputDialog, QDockWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QFontDialog, QColorDialog, QMessageBox, QSizePolicy
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QTextCursor, QTextCharFormat, QColor, QTextDocument, QFont
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, Signal
+import speech_recognition as sr
+import unicodedata
+import re
+import threading
 
 class VentanaPrincipal(QMainWindow):
+    recognized_text = Signal(str)
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Mini Word")
@@ -21,6 +26,14 @@ class VentanaPrincipal(QMainWindow):
 
         self.doc = QTextEdit()        # doc es el area de texto principal
         self.setCentralWidget(self.doc)
+
+        # Reconocimiento de voz
+        self.escuchando = False
+        self.hilo_voz = None
+        self.recognizer = sr.Recognizer()
+        # Conectar la señal para procesar texto desde el hilo de reconocimiento
+        self.recognized_text.connect(self.procesarTextoVoz)
+
 
         # Crear acciones usando el nuevo 
         actionNuevoArchivo = self.crearAccion(
@@ -263,12 +276,20 @@ class VentanaPrincipal(QMainWindow):
             self.aplicarBackground
         )
 
+        self.btnMicrofono = self.crearBoton(
+            QIcon.fromTheme("media-record"),
+            "Ctrl+M",
+            "Activar/desactivar dictado por voz",
+            self.toggleEscuchaVoz
+        )
+
         # Agregar botones al toolbar de formato
         toolbarFormato.addWidget(self.btnFuente)
         toolbarFormato.addWidget(self.btnNegrita)
         toolbarFormato.addWidget(self.btnCursiva)
         toolbarFormato.addWidget(self.btnSubrayado)
         toolbarFormato.addWidget(self.btnBackGround)
+        toolbarFormato.addWidget(self.btnMicrofono)
 
         # Añadir el toolbar debajo del principal
         self.addToolBarBreak(Qt.TopToolBarArea)  # Esto crea una "nueva fila"
@@ -711,6 +732,96 @@ class VentanaPrincipal(QMainWindow):
             formato = QTextCharFormat()
             formato.setBackground(color)
             self.doc.mergeCurrentCharFormat(formato)
+    
+    def toggleEscuchaVoz(self):
+        if not self.escuchando:
+            self.escuchando = True
+            self.statusBar().showMessage("🎤 Escuchando... Pulsa el micrófono otra vez para detener.")
+            self.btnMicrofono.setChecked(True)
+
+            # Lanzamos el hilo de escucha
+            self.hilo_voz = threading.Thread(target=self.esucharPorVoz, daemon=True)
+            self.hilo_voz.start()
+
+        else:
+            self.escuchando = False
+            self.statusBar().showMessage("Micrófono desactivado.")
+            self.btnMicrofono.setChecked(False)
+
+    def esucharPorVoz(self):
+        with sr.Microphone() as source:
+            # Ajustar ruido ambiente
+            self.recognizer.adjust_for_ambient_noise(source, duration=0.5)
+
+            while self.escuchando:
+                try:
+                    audio = self.recognizer.listen(source, phrase_time_limit=5)
+                    texto = self.recognizer.recognize_google(audio, language="es-ES")
+
+                    # Emitir la señal para procesar el texto en el hilo principal (seguro para GUI)
+                    self.recognized_text.emit(texto)
+
+                except sr.UnknownValueError:
+                    pass
+                except sr.RequestError:
+                    self.statusBar().showMessage("Error al conectar con el servicio de voz.")
+                    break
+
+    def procesarTextoVoz(self, texto):
+        # Normalizar texto: pasar a minúsculas, quitar acentos y signos de puntuación
+        texto_norm = texto.lower().strip()
+        texto_norm = unicodedata.normalize('NFD', texto_norm)
+        texto_norm = ''.join(ch for ch in texto_norm if unicodedata.category(ch) != 'Mn')
+        texto_norm = re.sub(r"[^\w\s]", "", texto_norm)
+        texto_norm = re.sub(r"\s+", " ", texto_norm).strip()
+
+        # Mapear comandos a botones y métodos
+        comandos = {
+            "negrita": (self.btnNegrita, self.aplicarNegrita),
+            "cursiva": (self.btnCursiva, self.aplicarCursiva),
+            "subrayado": (self.btnSubrayado, self.aplicarSubrayadoDebajo)
+        }
+
+        #palabras_on = ["activar", "encender", "poner", "iniciar", "abrir"]
+        #palabras_off = ["desactivar", "apagar", "quitar", "cerrar"]
+
+        # Procesar comandos de formato con soporte ON/OFF explícito
+        for palabra, (boton, metodo) in comandos.items():
+            if palabra in texto_norm:
+                '''if any(p in texto_norm for p in palabras_off):
+                    boton.setChecked(False)
+                    metodo()
+                    self.statusBar().showMessage(f"Comando detectado: quitar {palabra}")
+                    return
+                elif any(p in texto_norm for p in palabras_on):
+                    boton.setChecked(True)
+                    metodo()
+                    self.statusBar().showMessage(f"Comando detectado: activar {palabra}")
+                    return
+                else:'''
+                # Sin indicación ON/OFF, alternar
+                boton.toggle()
+                metodo()
+                self.statusBar().showMessage(f"Comando detectado: {palabra}")
+                return
+
+        # Guardar archivo
+        if "guardar" in texto_norm:
+            # Ejecutar guardado (seguro en hilo principal porque estamos en la señal)
+            self.GuardarArchivo()
+            self.statusBar().showMessage("Archivo guardado por comando de voz.")
+            return
+
+        # Nuevo documento
+        if "nuevo documento" in texto_norm or texto_norm == "nuevo":
+            self.nuevoArchivo()
+            return
+
+        # Si no es comando, escribir texto en el documento
+        cursor = self.doc.textCursor()
+        cursor.insertText(texto + " ")
+        self.doc.setTextCursor(cursor)
+
 
 
 if __name__ == "__main__":
