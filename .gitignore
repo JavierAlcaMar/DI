@@ -1,0 +1,14 @@
+# Ignorar archivos de texto con extensión .log y el archivo de configuración .env
+*.log
+.env
+
+# Ignorar una carpeta específica y su contenido
+dist/
+build/
+
+# Ignorar un archivo de configuración en la raíz del proyecto
+/development.log
+
+# Ignorar todos los archivos que terminen en .tmp, pero no producción.log
+*.tmp
+!production.log
