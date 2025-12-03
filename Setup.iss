@@ -3,7 +3,7 @@
 ; Non-commercial use only
 
 #define MyAppName "MiniWord"
-#define MyAppVersion "1.0"
+#define MyAppVersion "1.5"
 #define MyAppPublisher "Miralmonte FP by Javier Alcaraz Martín"
 #define MyAppURL "https://www.miralmonte.com"
 #define MyAppExeName "MiniWord.exe"
@@ -11,7 +11,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{3EB02ECF-8967-4504-A3CA-28DA4231DF5F}
+AppId={{83C3342E-CC0D-43AB-88CA-BA88142A1029}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -34,12 +34,13 @@ LicenseFile=LICENSE.txt
 ; Remove the following line to run in administrative install mode (install for all users).
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputBaseFilename=MiniWord
+OutputBaseFilename=MiniWord_Setup
 SetupIconFile=imagesMO\iconoApp.ico
 SolidCompression=yes
 WizardStyle=modern dynamic windows11
 
 [Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Tasks]
