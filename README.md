@@ -272,6 +272,22 @@ signtool sign /f MiniOfficeTestCert.pfx /fd SHA256 /tr http://timestamp.digicert
 
 ---
 
+## **Señales y su implementación**
+
+Esta sección documenta las señales principales usadas en la aplicación y dónde están implementadas en el código (`MiniOffice.py`). Para ver el código, sigue los enlaces a las líneas relevantes.
+
+- **Señal**: `recognized_text` — Señal personalizada que emite el texto reconocido por el subproceso de reconocimiento de voz. Definida en [MiniOffice.py](MiniOffice.py#L14), conectada a `procesarTextoVoz` en [MiniOffice.py](MiniOffice.py#L37) y emitida desde el hilo de escucha en [MiniOffice.py](MiniOffice.py#L769).
+- **Señal**: `visibilityChanged` — Señal del `QDockWidget` `dockBuscar` que se conecta a `cerrarDockBuscar` cuando cambia la visibilidad. Conexión en [MiniOffice.py](MiniOffice.py#L191).
+- **Señal**: `textChanged` de `QLineEdit` (`txtBuscar`) — Usada para disparar la búsqueda y el resaltado en tiempo real mediante `buscarPalabra`. Conexión en [MiniOffice.py](MiniOffice.py#L239).
+- **Señal**: `clicked` de botones de búsqueda y reemplazo — `btnBuscarSiguiente`, `btnBuscarAnterior`, `btnReemplazar`, `btnReemplazarTodo` están conectados respectivamente a `buscarSiguientePalabra`, `buscarAnteriorPalabra`, `reemplazarTexto`, `reemplazarTodoTexto`. Conexiones en [MiniOffice.py](MiniOffice.py#L240-L243).
+- **Señal**: `textChanged` de `QTextEdit` (`doc`) — Actualiza el `WordCounterWidget` mediante una lambda que llama a `update_from_text`. Conexión en [MiniOffice.py](MiniOffice.py#L311).
+- **Señal**: `triggered` de `QAction` — Todas las acciones creadas con `crearAccion()` conectan su `triggered` al método pasado (ej.: abrir, guardar, salir). Implementación de la conexión en [MiniOffice.py](MiniOffice.py#L328).
+- **Señal**: `clicked` de botones generados por `crearBoton()` — En el helper `crearBoton()` cada `QPushButton` conecta su `clicked` al método correspondiente (ej.: aplicar formatos). Implementación en [MiniOffice.py](MiniOffice.py#L351).
+
+Notas rápidas:
+- Las señales del framework (como `clicked`, `textChanged`, `visibilityChanged`, `triggered`) se conectan a handlers en el hilo principal para mantener la seguridad de la GUI.
+- La señal personalizada `recognized_text` se usa para pasar texto desde el hilo de reconocimiento de voz al hilo principal de la GUI de forma segura (emitida en el hilo de escucha y conectada al método `procesarTextoVoz`).
+
 ## 📄 Licencia
 
 **GNU Affero General Public License v3 (AGPL-3.0)**

@@ -3,6 +3,8 @@ import os
 from PySide6.QtWidgets import QApplication, QMainWindow, QToolBar, QTextEdit, QWhatsThis, QStatusBar, QFileDialog, QInputDialog, QDockWidget, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QFontDialog, QColorDialog, QMessageBox, QSizePolicy
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QTextCursor, QTextCharFormat, QColor, QTextDocument, QFont
 from PySide6.QtCore import Qt, QSize, Signal
+from contadorWidget import WordCounterWidget
+
 import speech_recognition as sr
 import unicodedata
 import re
@@ -296,13 +298,18 @@ class VentanaPrincipal(QMainWindow):
         self.addToolBar(Qt.TopToolBarArea, toolbarFormato)
 
         # Crear el contador y establecer la barra de estado
-        palabras = 0
+        # palabras = 0
 
-        status = QStatusBar()
-        self.setStatusBar(status)
-        self.statusBar().showMessage(f"Palabras: {palabras}")
-        # Conectar la señal textChanged del QTextEdit a la función actualizarContadorPalabras
-        self.doc.textChanged.connect(self.actualizarContadorPalabras)
+        # status = QStatusBar()
+        # self.setStatusBar(status)
+        # self.statusBar().showMessage(f"Palabras: {palabras}")
+        # # Conectar la señal textChanged del QTextEdit a la función actualizarContadorPalabras
+        # self.doc.textChanged.connect(self.actualizarContadorPalabras)
+        self.contador = WordCounterWidget(wpm=200, mostrarPalabras=True, mostrarCaracteres=True, mostrarTiempoLectura=True)
+        self.setStatusBar(QStatusBar())
+        self.statusBar().addPermanentWidget(self.contador)
+        self.doc.textChanged.connect(lambda: self.contador.update_from_text(self.doc.toPlainText()))
+        self.contador.update_from_text(self.doc.toPlainText())
 
         # Inicializaciones necesarias para la búsqueda/resaltado
         self.last_match_range = None
